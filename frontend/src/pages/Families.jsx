@@ -12,8 +12,10 @@ import {
   IconButton,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { useAuth } from '../context/AuthContext';
 import { fetchFamilies, deleteFamily } from '../services/familiesApi';
+import FamilyFormDialog from '../components/FamilyFormDialog';
 
 export default function Families() {
   const { user } = useAuth();
@@ -23,6 +25,13 @@ export default function Families() {
   const [search, setSearch] = useState('');
   const [categorie, setCategorie] = useState('');
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 20 });
+
+  // حالة الـ Dialog: مفتوح ولا لا + العائلة قيد التعديل (null = وضع الإضافة)
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedFamily, setSelectedFamily] = useState(null);
+
+  const canEdit = user?.role === 'admin' || user?.role === 'secretary';
+  const canDelete = user?.role === 'admin';
 
   const loadFamilies = useCallback(async () => {
     setLoading(true);
@@ -50,8 +59,18 @@ export default function Families() {
     return () => clearTimeout(timeout);
   }, [loadFamilies]);
 
+  function openAddDialog() {
+    setSelectedFamily(null); // وضع الإضافة
+    setDialogOpen(true);
+  }
+
+  function openEditDialog(family) {
+    setSelectedFamily(family); // وضع التعديل
+    setDialogOpen(true);
+  }
+
   async function handleDelete(id) {
-    if (!window.confirm('هل أنت متأكد من أنك تريد الحذف؟')) return;
+    if (!window.confirm('متأكد بغيت تحذف هذي العائلة؟')) return;
     try {
       await deleteFamily(id);
       loadFamilies();
@@ -82,14 +101,16 @@ export default function Families() {
     {
       field: 'actions',
       headerName: 'إجراءات',
-      width: 140,
+      width: 130,
       sortable: false,
       renderCell: (params) => (
-        <Stack direction="row" spacing={1}>
-          <Button size="small" onClick={() => alert('صفحة التعديل قيد الإنشاء')}>
-            تعديل
-          </Button>
-          {user?.role === 'admin' && (
+        <Stack direction="row" spacing={0.5}>
+          {canEdit && (
+            <IconButton size="small" color="primary" onClick={() => openEditDialog(params.row)}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+          )}
+          {canDelete && (
             <IconButton size="small" color="error" onClick={() => handleDelete(params.row.id)}>
               <DeleteIcon fontSize="small" />
             </IconButton>
@@ -123,8 +144,8 @@ export default function Families() {
           </Select>
         </FormControl>
 
-        {(user?.role === 'admin' || user?.role === 'secretary') && (
-          <Button variant="contained" onClick={() => alert('صفحة الإضافة قيد الإنشاء')}>
+        {canEdit && (
+          <Button variant="contained" onClick={openAddDialog}>
             + إضافة عائلة
           </Button>
         )}
@@ -143,6 +164,13 @@ export default function Families() {
           disableRowSelectionOnClick
         />
       </div>
+
+      <FamilyFormDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onSaved={loadFamilies}
+        family={selectedFamily}
+      />
     </div>
   );
 }
