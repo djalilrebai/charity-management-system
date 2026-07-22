@@ -72,28 +72,28 @@ enum Sexe {
 }
 
 model Family {
-  id            Int           @id @default(autoincrement())
-  numSequentiel String        @unique @map("num_sequentiel")
-  nom           String // اسم الأرملة
-  prenom        String // اللقب
-  dateNaissance DateTime      @map("date_naissance")
-  nationalId    String?       @unique @map("national_id") // رقم بطاقة التعريف الوطنية
-  telephone     String
-  adresse       String
-  quartier      String? // الحي — للفلترة
-  categorie     Categorie
-  salaire       Decimal       @db.Decimal(10, 2)
-  housingStatus HousingStatus @default(OTHER) @map("housing_status")
-  orphansCount  Int           @default(0) @map("orphans_count")
-  notes         String?       @db.Text
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
-  deletedAt     DateTime?     @map("deleted_at") // soft delete
+  id             Int           @id @default(autoincrement())
+  numSequentiel  String        @unique @map("num_sequentiel")
+  nom            String // اسم الأرملة
+  prenom         String // اللقب
+  dateNaissance  DateTime      @map("date_naissance")
+  nationalId     String?       @unique @map("national_id") // رقم بطاقة التعريف الوطنية
+  telephone      String
+  adresse        String
+  quartier       String? // الحي — للفلترة
+  categorie      Categorie
+  salaire        Decimal       @db.Decimal(10, 2)
+  housingStatus  HousingStatus @default(OTHER) @map("housing_status")
+  orphansCount   Int           @default(0) @map("orphans_count")
+  notes          String?       @db.Text
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  deletedAt      DateTime?     @map("deleted_at") // soft delete
 
-  children         Child[]
-  documents        Document[]
-  familyActivities FamilyActivity[]
-  students         Student[]
+  children          Child[]
+  documents         Document[]
+  familyActivities  FamilyActivity[]
+  students          Student[]
 
   @@index([nom, prenom])
   @@index([categorie])
@@ -128,8 +128,8 @@ model Document {
   uploadedBy Int      @map("uploaded_by")
   uploadedAt DateTime @default(now()) @map("uploaded_at")
 
-  family         Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  uploadedByUser User   @relation(fields: [uploadedBy], references: [id])
+  family     Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  uploadedByUser User @relation(fields: [uploadedBy], references: [id])
 
   @@index([familyId])
   @@map("documents")
@@ -140,11 +140,11 @@ model Document {
 // ============================================
 
 model Activity {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String // قفة رمضان، كسوة العيد، أضحية العيد...
   type        String? // مالي / عيني
-  description String?   @db.Text
-  createdAt   DateTime  @default(now()) @map("created_at")
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
   deletedAt   DateTime? @map("deleted_at")
 
   familyActivities FamilyActivity[]
@@ -157,6 +157,7 @@ model FamilyActivity {
   familyId   Int      @map("family_id")
   activityId Int      @map("activity_id")
   date       DateTime
+  quantity   Int?     @default(1) // الكمية (مثلاً: عدد القفف)
   value      Decimal? @db.Decimal(10, 2) // القيمة المالية إن وجدت
   notes      String?
 
@@ -179,12 +180,12 @@ enum ClassType {
 }
 
 model Student {
-  id            Int       @id @default(autoincrement())
-  familyId      Int?      @map("family_id")
+  id            Int      @id @default(autoincrement())
+  familyId      Int?     @map("family_id")
   nom           String
-  dateNaissance DateTime  @map("date_naissance")
+  dateNaissance DateTime @map("date_naissance")
   telephone     String?
-  createdAt     DateTime  @default(now()) @map("created_at")
+  createdAt     DateTime @default(now()) @map("created_at")
   deletedAt     DateTime? @map("deleted_at")
 
   family      Family?      @relation(fields: [familyId], references: [id])
@@ -196,12 +197,12 @@ model Student {
 }
 
 model ClassRoom {
-  id      Int       @id @default(autoincrement())
-  name    String
-  teacher String
-  type    ClassType
-  niveau  String? // المستوى
-  horaire String? // التوقيت
+  id       Int       @id @default(autoincrement())
+  name     String
+  teacher  String
+  type     ClassType
+  niveau   String? // المستوى
+  horaire  String? // التوقيت
 
   enrollments Enrollment[]
   attendance  Attendance[]
@@ -210,10 +211,10 @@ model ClassRoom {
 }
 
 model Enrollment {
-  id              Int      @id @default(autoincrement())
-  studentId       Int      @map("student_id")
-  classId         Int      @map("class_id")
-  dateInscription DateTime @default(now()) @map("date_inscription")
+  id               Int      @id @default(autoincrement())
+  studentId        Int      @map("student_id")
+  classId          Int      @map("class_id")
+  dateInscription  DateTime @default(now()) @map("date_inscription")
 
   student Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
   class   ClassRoom @relation(fields: [classId], references: [id], onDelete: Cascade)

@@ -4,6 +4,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import Login from './pages/Login';
 import Families from './pages/Families';
 import FamilyDetails from './pages/FamilyDetails';
+import Activities from './pages/Activities';
 
 export default function App() {
   return (
@@ -32,6 +33,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <FamilyDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/activities"
+            element={
+              <ProtectedRoute>
+                <Activities />
               </ProtectedRoute>
             }
           />
