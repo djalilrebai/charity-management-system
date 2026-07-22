@@ -4,6 +4,7 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/auth.routes');
 const familiesRoutes = require('./routes/families.routes');
+const childrenRoutes = require('./routes/children.routes');
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/families', familiesRoutes);
+app.use('/api/children', childrenRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'API جمعية خيرية - يعمل بنجاح' });

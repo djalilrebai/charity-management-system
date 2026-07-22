@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 import Login from './pages/Login';
 import Families from './pages/Families';
+import FamilyDetails from './pages/FamilyDetails';
 
 export default function App() {
   return (
@@ -23,6 +24,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Families />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/families/:id"
+            element={
+              <ProtectedRoute>
+                <FamilyDetails />
               </ProtectedRoute>
             }
           />

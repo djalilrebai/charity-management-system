@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DataGrid } from '@mui/x-data-grid';
 import {
   TextField,
@@ -13,11 +14,13 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useAuth } from '../context/AuthContext';
 import { fetchFamilies, deleteFamily } from '../services/familiesApi';
 import FamilyFormDialog from '../components/FamilyFormDialog';
 
 export default function Families() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [rows, setRows] = useState([]);
   const [rowCount, setRowCount] = useState(0);
@@ -101,10 +104,13 @@ export default function Families() {
     {
       field: 'actions',
       headerName: 'إجراءات',
-      width: 130,
+      width: 170,
       sortable: false,
       renderCell: (params) => (
         <Stack direction="row" spacing={0.5}>
+          <IconButton size="small" onClick={() => navigate(`/families/${params.row.id}`)}>
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
           {canEdit && (
             <IconButton size="small" color="primary" onClick={() => openEditDialog(params.row)}>
               <EditIcon fontSize="small" />

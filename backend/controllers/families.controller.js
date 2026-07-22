@@ -27,7 +27,7 @@ async function getFamilies(req, res) {
         skip,
         take: Number(limit),
         orderBy: { createdAt: 'desc' },
-        include: { _count: { select: { children: true } } },
+        include: { _count: { select: { children: { where: { deletedAt: null } } } } },
       }),
       prisma.family.count({ where }),
     ]);

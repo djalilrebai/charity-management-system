@@ -8,6 +8,7 @@ const {
   updateFamily,
   deleteFamily,
 } = require('../controllers/families.controller');
+const { getChildrenByFamily, createChild } = require('../controllers/children.controller');
 
 // كل الروابط تحت هذا خاصها تسجيل دخول (توكن صالح)
 router.use(verifyToken);
@@ -22,5 +23,10 @@ router.put('/:id', requireRole('admin', 'secretary'), updateFamily);
 
 // الحذف: admin بس
 router.delete('/:id', requireRole('admin'), deleteFamily);
+
+// الأطفال متداخلين تحت العائلة (القراءة والإضافة فقط)
+// التعديل والحذف يمرو عبر /api/children/:id مباشرة
+router.get('/:id/children', getChildrenByFamily);
+router.post('/:id/children', requireRole('admin', 'secretary'), createChild);
 
 module.exports = router;
