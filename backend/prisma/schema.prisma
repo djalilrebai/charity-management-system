@@ -43,7 +43,9 @@ model User {
   member    Member?    @relation(fields: [memberId], references: [id])
   documents Document[]
   incomes   Income[]   @relation("IncomeCreatedBy")
+  incomesUpdated Income[] @relation("IncomeUpdatedBy")
   expenses  Expense[]  @relation("ExpenseCreatedBy")
+  expensesUpdated Expense[] @relation("ExpenseUpdatedBy")
   auditLogs AuditLog[]
   familyActivitiesCreated FamilyActivity[] @relation("FamilyActivityCreatedBy")
 
@@ -248,30 +250,41 @@ model Attendance {
 // ============================================
 
 model Income {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   date        DateTime
-  amount      Decimal  @db.Decimal(12, 2)
-  source      String // تبرع، اشتراكات، إعانة بلدية، زكاة...
-  description String?  @db.Text
-  createdBy   Int      @map("created_by")
-  createdAt   DateTime @default(now()) @map("created_at")
+  amount      Decimal   @db.Decimal(12, 2)
+  category    String // تبرع، زكاة، اشتراكات، إعانة بلدية، وقف...
+  reference   String? // رقم الوصل/السند، مثلاً DON-2026-001
+  description String?   @db.Text
+  createdBy   Int       @map("created_by")
+  updatedBy   Int?      @map("updated_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
-  createdByUser User @relation("IncomeCreatedBy", fields: [createdBy], references: [id])
+  createdByUser User  @relation("IncomeCreatedBy", fields: [createdBy], references: [id])
+  updatedByUser User? @relation("IncomeUpdatedBy", fields: [updatedBy], references: [id])
 
   @@index([date])
+  @@index([category])
   @@map("income")
 }
 
 model Expense {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   date        DateTime
-  amount      Decimal  @db.Decimal(12, 2)
+  amount      Decimal   @db.Decimal(12, 2)
   category    String // قفة رمضان، كسوة، إيجار، فواتير...
-  description String?  @db.Text
-  createdBy   Int      @map("created_by")
-  createdAt   DateTime @default(now()) @map("created_at")
+  reference   String? // رقم الوصل/السند، مثلاً EXP-2026-015
+  description String?   @db.Text
+  createdBy   Int       @map("created_by")
+  updatedBy   Int?      @map("updated_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
-  createdByUser User @relation("ExpenseCreatedBy", fields: [createdBy], references: [id])
+  createdByUser User  @relation("ExpenseCreatedBy", fields: [createdBy], references: [id])
+  updatedByUser User? @relation("ExpenseUpdatedBy", fields: [updatedBy], references: [id])
 
   @@index([date])
   @@index([category])
