@@ -45,6 +45,7 @@ model User {
   incomes   Income[]   @relation("IncomeCreatedBy")
   expenses  Expense[]  @relation("ExpenseCreatedBy")
   auditLogs AuditLog[]
+  familyActivitiesCreated FamilyActivity[] @relation("FamilyActivityCreatedBy")
 
   @@index([roleId])
   @@map("users")
@@ -153,16 +154,20 @@ model Activity {
 }
 
 model FamilyActivity {
-  id         Int      @id @default(autoincrement())
-  familyId   Int      @map("family_id")
-  activityId Int      @map("activity_id")
+  id         Int       @id @default(autoincrement())
+  familyId   Int       @map("family_id")
+  activityId Int       @map("activity_id")
   date       DateTime
-  quantity   Int?     @default(1) // الكمية (مثلاً: عدد القفف)
-  value      Decimal? @db.Decimal(10, 2) // القيمة المالية إن وجدت
+  quantity   Int?      @default(1) // الكمية (مثلاً: عدد القفف)
+  value      Decimal?  @db.Decimal(10, 2) // القيمة المالية إن وجدت
   notes      String?
+  createdBy  Int?      @map("created_by") // من سجّل هذي الاستفادة
+  createdAt  DateTime  @default(now()) @map("created_at")
+  deletedAt  DateTime? @map("deleted_at")
 
-  family   Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  activity Activity @relation(fields: [activityId], references: [id])
+  family        Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  activity      Activity @relation(fields: [activityId], references: [id])
+  createdByUser User?  @relation("FamilyActivityCreatedBy", fields: [createdBy], references: [id])
 
   @@index([familyId])
   @@index([activityId])

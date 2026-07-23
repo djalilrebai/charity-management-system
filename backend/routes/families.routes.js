@@ -9,6 +9,10 @@ const {
   deleteFamily,
 } = require('../controllers/families.controller');
 const { getChildrenByFamily, createChild } = require('../controllers/children.controller');
+const {
+  getFamilyActivities,
+  createFamilyActivity,
+} = require('../controllers/family-activities.controller');
 
 // كل الروابط تحت هذا خاصها تسجيل دخول (توكن صالح)
 router.use(verifyToken);
@@ -28,5 +32,10 @@ router.delete('/:id', requireRole('admin'), deleteFamily);
 // التعديل والحذف يمرو عبر /api/children/:id مباشرة
 router.get('/:id/children', getChildrenByFamily);
 router.post('/:id/children', requireRole('admin', 'secretary'), createChild);
+
+// سجل الاستفادة من الأنشطة، متداخل تحت العائلة (القراءة والإضافة فقط)
+// التعديل والحذف يمرو عبر /api/family-activities/:id مباشرة
+router.get('/:id/activities', getFamilyActivities);
+router.post('/:id/activities', requireRole('admin', 'secretary'), createFamilyActivity);
 
 module.exports = router;

@@ -21,7 +21,9 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useAuth } from '../context/AuthContext';
 import { fetchFamilyById } from '../services/familiesApi';
 import { fetchChildrenByFamily, deleteChild } from '../services/childrenApi';
+import { fetchFamilyActivities, deleteFamilyActivity } from '../services/familyActivitiesApi';
 import ChildFormDialog from '../components/ChildFormDialog';
+import FamilyActivityFormDialog from '../components/FamilyActivityFormDialog';
 
 // حساب العمر من تاريخ الميلاد بدل ما نخزنو فـ القاعدة
 function calculateAge(dateNaissance) {
@@ -42,10 +44,14 @@ export default function FamilyDetails() {
 
   const [family, setFamily] = useState(null);
   const [children, setChildren] = useState([]);
+  const [activityRecords, setActivityRecords] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [childDialogOpen, setChildDialogOpen] = useState(false);
   const [selectedChild, setSelectedChild] = useState(null);
+
+  const [activityDialogOpen, setActivityDialogOpen] = useState(false);
+  const [selectedActivityRecord, setSelectedActivityRecord] = useState(null);
 
   const canEdit = user?.role === 'admin' || user?.role === 'secretary';
   const canDelete = user?.role === 'admin';
@@ -53,12 +59,14 @@ export default function FamilyDetails() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [familyData, childrenData] = await Promise.all([
+      const [familyData, childrenData, activitiesData] = await Promise.all([
         fetchFamilyById(id),
         fetchChildrenByFamily(id),
+        fetchFamilyActivities(id),
       ]);
       setFamily(familyData);
       setChildren(childrenData);
+      setActivityRecords(activitiesData);
     } catch (error) {
       console.error(error);
     } finally {
@@ -70,20 +78,42 @@ export default function FamilyDetails() {
     loadData();
   }, [loadData]);
 
-  function openAddDialog() {
+  // --- الأطفال ---
+  function openAddChildDialog() {
     setSelectedChild(null);
-    setDialogOpen(true);
+    setChildDialogOpen(true);
   }
 
-  function openEditDialog(child) {
+  function openEditChildDialog(child) {
     setSelectedChild(child);
-    setDialogOpen(true);
+    setChildDialogOpen(true);
   }
 
   async function handleDeleteChild(childId) {
     if (!window.confirm('متأكد بغيت تحذف هذا الطفل؟')) return;
     try {
       await deleteChild(childId);
+      loadData();
+    } catch (error) {
+      alert(error.response?.data?.message || 'حدث خطأ أثناء الحذف');
+    }
+  }
+
+  // --- الاستفادات ---
+  function openAddActivityDialog() {
+    setSelectedActivityRecord(null);
+    setActivityDialogOpen(true);
+  }
+
+  function openEditActivityDialog(record) {
+    setSelectedActivityRecord(record);
+    setActivityDialogOpen(true);
+  }
+
+  async function handleDeleteActivityRecord(recordId) {
+    if (!window.confirm('متأكد بغيت تحذف هذي الاستفادة؟')) return;
+    try {
+      await deleteFamilyActivity(recordId);
       loadData();
     } catch (error) {
       alert(error.response?.data?.message || 'حدث خطأ أثناء الحذف');
@@ -146,11 +176,11 @@ export default function FamilyDetails() {
       </Paper>
 
       {/* جدول الأطفال */}
-      <Paper sx={{ padding: 3 }}>
+      <Paper sx={{ padding: 3, marginBottom: 3 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ marginBottom: 2 }}>
           <Typography variant="h6">الأطفال ({children.length})</Typography>
           {canEdit && (
-            <Button variant="contained" size="small" onClick={openAddDialog}>
+            <Button variant="contained" size="small" onClick={openAddChildDialog}>
               + إضافة طفل
             </Button>
           )}
@@ -181,7 +211,7 @@ export default function FamilyDetails() {
                   <TableCell>
                     <Stack direction="row" spacing={0.5}>
                       {canEdit && (
-                        <IconButton size="small" color="primary" onClick={() => openEditDialog(child)}>
+                        <IconButton size="small" color="primary" onClick={() => openEditChildDialog(child)}>
                           <EditIcon fontSize="small" />
                         </IconButton>
                       )}
@@ -199,12 +229,74 @@ export default function FamilyDetails() {
         )}
       </Paper>
 
+      {/* جدول الاستفادات */}
+      <Paper sx={{ padding: 3 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ marginBottom: 2 }}>
+          <Typography variant="h6">الاستفادات ({activityRecords.length})</Typography>
+          {canEdit && (
+            <Button variant="contained" size="small" onClick={openAddActivityDialog}>
+              + تسجيل استفادة
+            </Button>
+          )}
+        </Stack>
+
+        {activityRecords.length === 0 ? (
+          <Typography color="text.secondary">لا توجد استفادات مسجلة لهذه العائلة</Typography>
+        ) : (
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>النشاط</TableCell>
+                <TableCell>التاريخ</TableCell>
+                <TableCell>الكمية</TableCell>
+                <TableCell>القيمة</TableCell>
+                <TableCell>تم التسجيل بواسطة</TableCell>
+                <TableCell>إجراءات</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {activityRecords.map((record) => (
+                <TableRow key={record.id}>
+                  <TableCell>{record.activityName}</TableCell>
+                  <TableCell>{record.date?.slice(0, 10)}</TableCell>
+                  <TableCell>{record.quantity}</TableCell>
+                  <TableCell>{record.value ? `${record.value} دج` : '—'}</TableCell>
+                  <TableCell>{record.createdByUsername || '—'}</TableCell>
+                  <TableCell>
+                    <Stack direction="row" spacing={0.5}>
+                      {canEdit && (
+                        <IconButton size="small" color="primary" onClick={() => openEditActivityDialog(record)}>
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                      {canDelete && (
+                        <IconButton size="small" color="error" onClick={() => handleDeleteActivityRecord(record.id)}>
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </Paper>
+
       <ChildFormDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
+        open={childDialogOpen}
+        onClose={() => setChildDialogOpen(false)}
         onSaved={loadData}
         familyId={id}
         child={selectedChild}
+      />
+
+      <FamilyActivityFormDialog
+        open={activityDialogOpen}
+        onClose={() => setActivityDialogOpen(false)}
+        onSaved={loadData}
+        familyId={id}
+        record={selectedActivityRecord}
       />
     </div>
   );

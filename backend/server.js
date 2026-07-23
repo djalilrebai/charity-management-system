@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth.routes');
 const familiesRoutes = require('./routes/families.routes');
 const childrenRoutes = require('./routes/children.routes');
 const activitiesRoutes = require('./routes/activities.routes');
+const familyActivitiesRoutes = require('./routes/family-activities.routes');
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/families', familiesRoutes);
 app.use('/api/children', childrenRoutes);
 app.use('/api/activities', activitiesRoutes);
+app.use('/api/family-activities', familyActivitiesRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'API جمعية خيرية - يعمل بنجاح' });
