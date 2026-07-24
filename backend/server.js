@@ -10,6 +10,8 @@ const familyActivitiesRoutes = require('./routes/family-activities.routes');
 const incomeRoutes = require('./routes/income.routes');
 const expensesRoutes = require('./routes/expenses.routes');
 const financeRoutes = require('./routes/finance.routes');
+const membersRoutes = require('./routes/members.routes');
+const classesRoutes = require('./routes/classes.routes');
 
 const app = express();
 
@@ -24,6 +26,8 @@ app.use('/api/family-activities', familyActivitiesRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/expenses', expensesRoutes);
 app.use('/api/finance', financeRoutes);
+app.use('/api/members', membersRoutes);
+app.use('/api/classes', classesRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'API جمعية خيرية - يعمل بنجاح' });

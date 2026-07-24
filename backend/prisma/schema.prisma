@@ -96,7 +96,6 @@ model Family {
   children          Child[]
   documents         Document[]
   familyActivities  FamilyActivity[]
-  students          Student[]
 
   @@index([nom, prenom])
   @@index([categorie])
@@ -117,6 +116,9 @@ model Child {
   deletedAt     DateTime? @map("deleted_at")
 
   family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  enrollments Enrollment[]
+  attendances Attendance[]
 
   @@index([familyId])
   @@map("children")
@@ -186,23 +188,6 @@ enum ClassType {
   CORANIQUE // تعليم قرآني
 }
 
-model Student {
-  id            Int      @id @default(autoincrement())
-  familyId      Int?     @map("family_id")
-  nom           String
-  dateNaissance DateTime @map("date_naissance")
-  telephone     String?
-  createdAt     DateTime @default(now()) @map("created_at")
-  deletedAt     DateTime? @map("deleted_at")
-
-  family      Family?      @relation(fields: [familyId], references: [id])
-  enrollments Enrollment[]
-  attendance  Attendance[]
-
-  @@index([familyId])
-  @@map("students")
-}
-
 model ClassRoom {
   id       Int       @id @default(autoincrement())
   name     String
@@ -210,37 +195,40 @@ model ClassRoom {
   type     ClassType
   niveau   String? // المستوى
   horaire  String? // التوقيت
+  notes    String? // ملاحظات
+  deletedAt DateTime? @map("deleted_at")
 
   enrollments Enrollment[]
-  attendance  Attendance[]
+  attendances Attendance[]
 
   @@map("classes")
 }
 
 model Enrollment {
   id               Int      @id @default(autoincrement())
-  studentId        Int      @map("student_id")
+  childId          Int      @map("child_id")
   classId          Int      @map("class_id")
   dateInscription  DateTime @default(now()) @map("date_inscription")
+  status           String   @default("ACTIVE") // ACTIVE / STOPPED
 
-  student Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  class   ClassRoom @relation(fields: [classId], references: [id], onDelete: Cascade)
+  child Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
+  class ClassRoom @relation(fields: [classId], references: [id], onDelete: Cascade)
 
-  @@unique([studentId, classId])
+  @@unique([childId, classId])
   @@map("enrollments")
 }
 
 model Attendance {
   id         Int      @id @default(autoincrement())
-  studentId  Int      @map("student_id")
+  childId    Int      @map("child_id")
   classId    Int      @map("class_id")
   lessonDate DateTime @map("lesson_date")
   present    Boolean  @default(true)
 
-  student Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  class   ClassRoom @relation(fields: [classId], references: [id], onDelete: Cascade)
+  child Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
+  class ClassRoom @relation(fields: [classId], references: [id], onDelete: Cascade)
 
-  @@index([studentId, lessonDate])
+  @@index([childId, lessonDate])
   @@index([classId, lessonDate])
   @@map("attendance")
 }

@@ -6,6 +6,7 @@ import Families from './pages/Families';
 import FamilyDetails from './pages/FamilyDetails';
 import Activities from './pages/Activities';
 import Finance from './pages/Finance';
+import Members from './pages/Members';
 
 export default function App() {
   return (
@@ -50,6 +51,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Finance />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/members"
+            element={
+              <ProtectedRoute>
+                <Members />
               </ProtectedRoute>
             }
           />
