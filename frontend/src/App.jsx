@@ -7,6 +7,7 @@ import FamilyDetails from './pages/FamilyDetails';
 import Activities from './pages/Activities';
 import Finance from './pages/Finance';
 import Members from './pages/Members';
+import Classes from './pages/Classes';
 
 export default function App() {
   return (
@@ -59,6 +60,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Members />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/classes"
+            element={
+              <ProtectedRoute>
+                <Classes />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/classes/:id"
+            element={
+              <ProtectedRoute>
+                <p style={{ padding: 24 }}>صفحة تفاصيل القسم (قيد الإنشاء — المرحلة 2)</p>
               </ProtectedRoute>
             }
           />
